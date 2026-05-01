@@ -1,0 +1,119 @@
+import type { NextFetchEvent, NextRequest } from 'next/server';
+import { detectBot } from '@arcjet/next';
+import { jwtVerify } from 'jose';
+import createMiddleware from 'next-intl/middleware';
+import { NextResponse } from 'next/server';
+import arcjet from '@/libs/Arcjet';
+import { routing } from './libs/I18nRouting';
+
+const handleI18nRouting = createMiddleware(routing);
+
+// Use process.env directly to reduce middleware bundle size
+const accessSecret = new TextEncoder().encode(process.env.JWT_SECRET!);
+
+const protectedPaths = ['/dashboard', '/leads-lists', '/export-jobs', '/admin'];
+const authPaths = ['/sign-in', '/sign-up', '/verify-email', '/forgot-password', '/reset-password'];
+
+function matchesPath(pathname: string, paths: string[]): boolean {
+  return paths.some(
+    path =>
+      pathname === path
+      || pathname.startsWith(`${path}/`)
+      // Match with locale prefix, e.g. /en/dashboard
+      || new RegExp(`^/[a-z]{2}(-[A-Z]{2})?${path}(/.*)?$`).test(pathname),
+  );
+}
+
+// Improve security with Arcjet
+const aj = arcjet.withRule(
+  detectBot({
+    mode: 'LIVE',
+    // Block all bots except the following
+    allow: [
+      // See https://docs.arcjet.com/bot-protection/identifying-bots
+      'CATEGORY:SEARCH_ENGINE', // Allow search engines
+      'CATEGORY:PREVIEW', // Allow preview links to show OG images
+      'CATEGORY:MONITOR', // Allow uptime monitoring services
+    ],
+  }),
+);
+
+type TokenPayload = { userId: string; email: string; role: string };
+
+async function getTokenPayload(token: string): Promise<TokenPayload | null> {
+  try {
+    const { payload } = await jwtVerify(token, accessSecret);
+    return payload as TokenPayload;
+  } catch {
+    return null;
+  }
+}
+
+export default async function proxy(
+  request: NextRequest,
+  _event: NextFetchEvent,
+) {
+  // Verify the request with Arcjet
+  if (process.env.ARCJET_KEY) {
+    const decision = await aj.protect(request);
+
+    if (decision.isDenied()) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+  }
+
+  // API routes handle their own auth — skip middleware logic
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
+  const { pathname } = request.nextUrl;
+  const isProtected = matchesPath(pathname, protectedPaths);
+  const isAuthPage = matchesPath(pathname, authPaths);
+
+  if (isProtected || isAuthPage) {
+    const token = request.cookies.get('access_token')?.value;
+    const payload = token ? await getTokenPayload(token) : null;
+    const isAuthenticated = payload !== null;
+
+    const locale = pathname.match(/^\/([a-z]{2}(?:-[A-Z]{2})?)\//)?.at(1) ?? '';
+
+    if (isProtected && !isAuthenticated) {
+      const signInUrl = new URL(`${locale ? `/${locale}` : ''}/sign-in`, request.url);
+      return NextResponse.redirect(signInUrl);
+    }
+
+    // Admin-only paths: non-admin users are logged out and sent to sign-in
+    if (isAuthenticated && matchesPath(pathname, ['/admin']) && payload?.role !== 'admin') {
+      const signInUrl = new URL(`${locale ? `/${locale}` : ''}/sign-in`, request.url);
+      const response = NextResponse.redirect(signInUrl);
+      response.cookies.delete('access_token');
+      response.cookies.delete('refresh_token');
+      return response;
+    }
+
+    if (isAuthPage && isAuthenticated) {
+      const dashboardUrl = new URL(`${locale ? `/${locale}` : ''}/dashboard`, request.url);
+      return NextResponse.redirect(dashboardUrl);
+    }
+
+    // Prevent browsers from caching auth pages in the back/forward cache (bfcache).
+    // Without this, pressing Back after login shows the cached sign-in/sign-up page
+    // even though the middleware would redirect — because bfcache skips the request.
+    // Cache-Control: no-store tells browsers not to store the page at all.
+    if (isAuthPage && !isAuthenticated) {
+      const response = handleI18nRouting(request);
+      response.headers.set('Cache-Control', 'no-store');
+      return response;
+    }
+  }
+
+  return handleI18nRouting(request);
+}
+
+export const config = {
+  // Match all pathnames except for
+  // - … if they start with `/_next`, `/_vercel` or `monitoring`
+  // - … the ones containing a dot (e.g. `favicon.ico`)
+  matcher: '/((?!_next|_vercel|monitoring|.*\\..*).*)',
+};

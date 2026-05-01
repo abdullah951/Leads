@@ -1,0 +1,16 @@
+export const CLIENT_ROUTES = {
+  home: '/',
+  signIn: '/sign-in',
+  signUp: '/sign-up',
+  dashboard: '/dashboard',
+  leadsList: '/leads-lists',
+  exportJobs: '/export-jobs',
+  uploadedFiles: '/uploaded-files',
+  verifyEmail: '/verify-email',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
+  team: '/team',
+  revealHistory: '/reveal-history',
+  documentation: '/documentation',
+  whatsNew: '/whats-new',
+} as const;

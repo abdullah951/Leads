@@ -1,0 +1,243 @@
+@layer theme, base, clerk, components, utilities; /* Ensure Clerk is compatible with Tailwind CSS v4 */
+
+@import 'tailwindcss';
+
+@theme {
+  /* ── Brand — Indigo-600 primary (Stripe / Linear aesthetic) ──────────────
+   * Primary:   Indigo-600 (#4F46E5) — buttons, active states, links
+   * Dark:      Indigo-700 (#4338CA) — hover states
+   * Light:     Indigo-50  (#EEF2FF) — badge backgrounds, chip fills
+   * ──────────────────────────────────────────────────────────────────────── */
+  --color-brand: #4F46E5;
+  --color-brand-dark: #4338CA;
+  --color-brand-light: #EEF2FF;
+
+  /* Emerald accent — used for "revealed" contact data status indicators */
+  --color-emerald: #10B981;
+  --color-emerald-light: #D1FAE5;
+
+  /* Amber accent — filter active highlights */
+  --color-amber: #F59E0B;
+  --color-amber-light: #FEF3C7;
+
+  /* Semantic */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #4F46E5;
+
+  /* ── Surfaces — pure white content, Slate-50 sidebar depth ───────────────
+   * Main content: pure white (#FFFFFF)
+   * Sidebar:      Slate-50 (#F8FAFC) — subtle depth separation
+   * Borders:      Slate-200 (#E2E8F0) — 1px hairline borders
+   * ──────────────────────────────────────────────────────────────────────── */
+  --color-surface: #FFFFFF;
+  --color-surface-subtle: #F8FAFC;
+  --color-border: #E2E8F0;
+
+  /* ── Typography — Deep Slate for headings, medium slate for secondary ─────
+   * Primary:   Slate-900 (#0F172A) — headings, names
+   * Secondary: Slate-500 (#64748B) — labels, metadata
+   * Muted:     Slate-400 (#94A3B8) — placeholders, disabled
+   * ──────────────────────────────────────────────────────────────────────── */
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #64748B;
+  --color-text-muted: #94A3B8;
+
+  /* Focus ring — indigo glow matching the brand primary */
+  --color-focus-ring: rgb(79 70 229 / 0.35);
+
+  /* Top bar — white with hairline bottom border */
+  --color-topbar-bg: #FFFFFF;
+  --color-topbar-border: #E2E8F0;
+
+  /* Sidebar — Slate-50 background to create subtle depth vs main content */
+  --color-sidebar-bg: #F8FAFC;
+  --color-sidebar-border: #E2E8F0;
+
+  /* Spacing (4-point grid) */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+
+  /* ── Radii — 4–6px crisp corners (no heavy rounding) ────────────────────── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* ── Shadows — subtle indigo-tinted depth, no heavy drop shadows ──────────
+   * sm:    1px lift for cards / table rows
+   * md:    4px for dropdowns / popovers
+   * lg:    10px for modals
+   * focus: 3px indigo ring for interactive elements
+   * ──────────────────────────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+  --shadow-md: 0 4px 6px -1px rgb(79 70 229 / 0.08), 0 2px 4px -2px rgb(79 70 229 / 0.04);
+  --shadow-lg: 0 10px 15px -3px rgb(79 70 229 / 0.1), 0 4px 6px -4px rgb(79 70 229 / 0.05);
+  --shadow-focus: 0 0 0 3px var(--color-focus-ring);
+
+  /* Motion */
+  --duration-fast: 100ms;
+  --duration-base: 200ms;
+  --duration-slow: 400ms;
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Z-index */
+  --z-sidebar: 10;
+  --z-topbar: 20;
+  --z-modal: 50;
+  --z-toast: 60;
+  --z-tooltip: 70;
+
+  /* ── Typography ──────────────────────────────────────────────────────────
+   * --font-sans  → Inter (high-legibility sans — names, labels, body)
+   * --font-mono  → JetBrains Mono (numbers, emails, phones, tags)
+   *
+   * These CSS variables are injected by Next.js font loader via the
+   * className on <html> in src/app/[locale]/layout.tsx.
+   * To change a typeface, edit src/styles/fonts.ts — that's the only file
+   * you need to touch.
+   * ──────────────────────────────────────────────────────────────────── */
+  --font-sans: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  --font-mono: var(--font-mono, ui-monospace, 'Courier New', monospace);
+}
+
+/* ── Theme overrides ──────────────────────────────────────────────────────────
+ * Three sources of dark colours, applied in priority order:
+ *
+ *   1. [data-theme="dark"]  on <html>  — explicit dark  (set by SettingsView + cookie)
+ *   2. [data-theme="light"] on <html>  — explicit light (overrides OS dark preference)
+ *   3. @media prefers-color-scheme: dark — "auto" / no cookie (OS default)
+ *
+ * The wl_theme cookie is read server-side in src/app/[locale]/layout.tsx and
+ * written to data-theme before hydration so there is no flash on page load.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+/* Auto mode — honour OS dark preference when no explicit theme is set */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-surface: #0F172A;        /* Slate-900 */
+    --color-surface-subtle: #1E293B; /* Slate-800 */
+    --color-border: #334155;         /* Slate-700 */
+    --color-text-primary: #F8FAFC;   /* Slate-50 */
+    --color-text-secondary: #94A3B8; /* Slate-400 */
+    --color-text-muted: #64748B;     /* Slate-500 */
+    --color-topbar-bg: #0F172A;
+    --color-topbar-border: #334155;
+    --color-sidebar-bg: #1E293B;
+    --color-sidebar-border: #334155;
+  }
+}
+
+/* Explicit dark mode — [data-theme="dark"] on <html> forces dark regardless of OS */
+[data-theme="dark"] {
+  --color-surface: #0F172A;
+  --color-surface-subtle: #1E293B;
+  --color-border: #334155;
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+  --color-topbar-bg: #0F172A;
+  --color-topbar-border: #334155;
+  --color-sidebar-bg: #1E293B;
+  --color-sidebar-border: #334155;
+}
+
+/* Explicit light mode — [data-theme="light"] on <html> forces light even on a dark OS */
+[data-theme="light"] {
+  --color-surface: #FFFFFF;
+  --color-surface-subtle: #F8FAFC;
+  --color-border: #E2E8F0;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #64748B;
+  --color-text-muted: #94A3B8;
+  --color-topbar-bg: #FFFFFF;
+  --color-topbar-border: #E2E8F0;
+  --color-sidebar-bg: #F8FAFC;
+  --color-sidebar-border: #E2E8F0;
+}
+
+/* Glass drawer panel slide-in — panel glides in from the left on hover */
+@keyframes glassSlideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0);    }
+}
+
+/* Contact cell unmask animation — fades in + slides up when a lead is revealed */
+@keyframes unmask {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* Top progress bar animation */
+@keyframes progress {
+  0% { width: 0%; margin-left: 0; }
+  50% { width: 60%; margin-left: 20%; }
+  100% { width: 0%; margin-left: 100%; }
+}
+
+/* ── Landing page animations ──────────────────────────────────────────────────
+ * These are used exclusively by the LandingPage component.
+ * Tailwind v4 has no tailwind.config.js — custom keyframes live here.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+/* Dot-grid hero background texture */
+.dot-grid {
+  background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Ticker scroll — scrolls content leftward at 24s loop */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Fade + slide up — used for scroll-triggered section reveals */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Pure fade — used for navbar and badge on mount */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Utility classes that reference the keyframes above */
+.animate-ticker   { animation: ticker  24s linear    infinite; }
+.animate-fade-up  { animation: fadeUp  0.5s ease-out forwards; }
+.animate-fade-in  { animation: fadeIn  0.4s ease-out forwards; }
+
+/* Pause ticker on hover — outer class on the wrapper, targets inner */
+.ticker-wrap:hover .ticker-inner {
+  animation-play-state: paused;
+}
+
+/* Base resets */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  /* Inter for all body text — readable at small sizes */
+  font-family: var(--font-sans);
+}
+
+/* Apply JetBrains Mono to any element tagged with font-mono.
+ * Use this class on: email addresses, phone numbers, numeric counts, code tags.
+ * Example: <span className="font-mono">+1 555 0100</span>
+ * To change the monospaced font, update src/styles/fonts.ts only. */
+.font-mono {
+  font-family: var(--font-mono);
+}

@@ -1,0 +1,104 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1772890962703,
+      "tag": "0000_nostalgic_lizard",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1772916346673,
+      "tag": "0001_volatile_black_panther",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772932203093,
+      "tag": "0002_solid_dexter_bennett",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1773155213486,
+      "tag": "0003_red_leader",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1773338548391,
+      "tag": "0004_chief_ravenous",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1773360150059,
+      "tag": "0005_parched_leopardon",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1773366857632,
+      "tag": "0006_uneven_scarlet_witch",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1773368641126,
+      "tag": "0007_productive_satana",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1773369134777,
+      "tag": "0008_fresh_galactus",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1773370669010,
+      "tag": "0009_lush_mockingbird",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1773372332137,
+      "tag": "0010_yellow_pestilence",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1773373366701,
+      "tag": "0011_yummy_lila_cheney",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1773411951818,
+      "tag": "0012_fast_venus",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1773493760662,
+      "tag": "0013_real_chat",
+      "breakpoints": true
+    }
+  ]
+}
